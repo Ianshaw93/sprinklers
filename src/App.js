@@ -70,6 +70,69 @@ function App() {
     console.log("width, height", width, length)
     // check if area/25 > total sprinklers from above
     // should be iterative?
+    let internalSprinklers = totalSprinklers;
+    let internalWidth = width;
+    let internalLength = length;
+    let internalHorizontalSpacing = horizontalSpacing 
+    let internalVerticalSpacing = verticalSpacing
+    let reductionInDimension = 0.1;
+    let maxAreaPerSprinkler = 25;
+
+    while (
+      internalSprinklers < (
+        (internalWidth * internalLength)/maxAreaPerSprinkler)
+        ) 
+    {
+
+      if (internalHorizontalSpacing > internalVerticalSpacing) {
+        internalWidth = reduceDistance(internalWidth, reductionInDimension)
+        internalHorizontalSpacing = computeSpacing(internalWidth, horizontalSprinklers)
+      } else {
+        internalLength = reduceDistance(internalLength, reductionInDimension)
+        internalVerticalSpacing = computeSpacing(internalLength, verticalSprinklers)
+      }
+
+    }
+
+    // add internal grid and sprinklers to array
+    let innerGridPoints = spreadPointsEvenly(horizontalSprinklers, verticalSprinklers, internalWidth, internalLength)
+    Array.prototype.push.apply(sprinklerPositionArray,innerGridPoints)
+
+    // only proceede if perimeter exists
+    let perimeterWidth = width - internalWidth;
+    let perimeterLength = length - internalLength;
+
+    if (perimeterWidth || perimeterLength > 0) {
+      // find sprinklers to serve perimeter area
+      // Area 1: perimeterLength * externalWidth
+      if (perimeterLength > 0) {
+        let [
+          area1HorizontalSprinklers, area1VerticalSprinklers, 
+          area1VerticalSpacing, area1HorizontalSpacing
+        ] = computeMaxSprinklerSpacingAndGridInRect(width, perimeterLength)
+
+        let area1Points = spreadPointsEvenly(
+          area1HorizontalSprinklers, 
+          area1VerticalSprinklers,
+          width, 
+          perimeterLength
+          // likely needs offset
+          )
+        // Area 1 needs internal length to be added to all points (using js y positive downwards) 
+      }
+      // Area 2: perimeterWidth * internalGridLength
+      // Area 2 needs internal width to be added to all points (using js x positive to right) 
+
+    } // else finish
+
+    let [
+      perimeterHorizontalSprinklers, 
+      perimeterVerticalSprinklers, 
+      perimeterVerticalSpacing, 
+      perimeterHorizontalSpacing
+    ] = computeMaxSprinklerSpacingAndGridInRect(perimeterWidth, perimeterLength)
+
+    // below can be once broken out of while loop
     if (totalSprinklers >= area/25) {
       // continue
       // locate evenly
@@ -167,9 +230,9 @@ function App() {
 
   }
 
-  function computeMaxSprinklersInRect(width, length) {
-    let horizontalSprinklers = Math.ceil(width / 5.5)
-    let verticalSprinklers = Math.ceil(length / 5.5)
+  function computeMaxSprinklersInRect(width, length, radius=5.5) {
+    let horizontalSprinklers = Math.ceil(width / radius)
+    let verticalSprinklers = Math.ceil(length / radius)
     return [horizontalSprinklers, verticalSprinklers]
   }
 
@@ -190,7 +253,7 @@ function App() {
     return distance / (2 * points)
   }
 
-  function spreadPointsEvenly(pointsAcross, pointsUp, width, length) {
+  function spreadPointsEvenly(pointsAcross, pointsUp, width, length, offsetX=0, offsetY=0) {
     // TODO: if spread between 2.75 and 2.4 - spread evenly
     let verticalSpacing = length/(2*pointsUp);
     let horizontalSpacing = width/(2*pointsAcross);
@@ -199,7 +262,8 @@ function App() {
     let points = [];
     for (let i = 0; i < pointsAcross; i++) {
       for (let j = 0; j < pointsUp; j++) {
-        let current = [horizontalSpacing*(i*2+1), -verticalSpacing*(j*2+1)]
+        // not sure if y is correct??
+        let current = [horizontalSpacing*(i*2+1)+offsetX, -verticalSpacing*(j*2+1)+offsetY]
         points.push(current)
       }
     }
