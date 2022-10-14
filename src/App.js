@@ -36,19 +36,43 @@ function App() {
   }
 
   const area = computeRectArea(calcData.width, calcData.length)
-  // must be <= 5.5m2 per sprinkler
-  // const sprinklers = Math.ceil(Math.max(calcData.width, calcData.length) / 5.5)
-  const [sprinklers, maxDistance] = computeSprinklersNeeded(area, calcData.width, calcData.length)
+
+  const [sprinklers, maxDistance] = (area) ? computeSprinklersNeeded(area, calcData.width, calcData.length) : [null, null]
   
+  let monteCarloArea = 45
+  let monteCarloWidth = 8
+  let monteCarloLength = monteCarloArea / monteCarloWidth
+  const [sprinklersMonteCarlo] = computeSprinklersNeeded(monteCarloArea, monteCarloWidth, monteCarloLength)
+  console.log(sprinklersMonteCarlo)
+
+  const maxDMonteCarlo = computeMaxDistanceFromPoint()
+  
+
+  function computeMaxDistanceFromPoint(width=monteCarloWidth, length=monteCarloLength, sprinklerLocationArray=sprinklersMonteCarlo, point=[0,0]) {
+    let maxDistanceToPoint = null
+    let [pointX, pointY] = point 
+    // loop through sprinkler locations
+    for (let i=0; i<sprinklerLocationArray.length; i++) {
+      // find radial distance from current sprinkler to point
+      let [currentSprinklerX, currentSprinklerY] = sprinklerLocationArray[i];
+      // point: (x, y)
+      let diffX = Math.abs(currentSprinklerX-pointX)
+      let diffY = Math.abs(currentSprinklerY-pointY)
+      // difference
+      let distance = computeHypotunous(diffX, diffY)
+
+      if (maxDistanceToPoint == null || maxDistanceToPoint < distance) {
+        maxDistanceToPoint = distance
+      }
+    }
+    return maxDistanceToPoint
+  }
 
   function computeSprinklersNeeded(area, width, length) {
     if (area <= 25 && Math.max(length, width) <= 5.5) {
-      // setCalcData({...calcData, sprinklers: [[width/2, -length/2]]})
       console.log(calcData)
-      return [[[width/2, -length/2]], computeSpacing(Math.max(length, width), 1)]
+      return [[[width/2, -length/2]], computeHypotunous(length/2, width/2)]
     } else {
-      // let [positions, maxD] = computeSprinklerPositions(area, width, length)
-      // setCalcData({...calcData, sprinklers: positions})
       return computeSprinklerPositions(area, width, length)
     }
 
@@ -57,7 +81,7 @@ function App() {
   function computeSprinklerPositions(area, width, length) {
     let sprinklerPositionArray = [];
     let sprinklerSpacingArray = [];
-    let radiusArray = [];
+    let maxDistanceArray = [];
     let [
       horizontalSprinklers, 
       verticalSprinklers, 
@@ -68,8 +92,7 @@ function App() {
     let totalSprinklers = horizontalSprinklers * verticalSprinklers
     console.log("horizontalSprinklers: ", horizontalSprinklers, "verticalSprinklers: ", verticalSprinklers)
     console.log("width, height", width, length)
-    // check if area/25 > total sprinklers from above
-    // should be iterative?
+
     let internalSprinklers = totalSprinklers;
     let internalWidth = width;
     let internalLength = length;
@@ -96,8 +119,9 @@ function App() {
 
     // add internal grid and sprinklers to array
     let innerGridPoints = spreadPointsEvenly(horizontalSprinklers, verticalSprinklers, internalWidth, internalLength)
-    Array.prototype.push.apply(sprinklerPositionArray,innerGridPoints)
-
+    appendArray2ElementsIntoArray1(sprinklerPositionArray,innerGridPoints)
+    // sprinklerPositionArray.push(innerGridPoints)
+    maxDistanceArray.push( computeHypotunous(internalVerticalSpacing, internalHorizontalSpacing) )
     // only proceede if perimeter exists
     let perimeterWidth = width - internalWidth;
     let perimeterLength = length - internalLength;
@@ -115,117 +139,53 @@ function App() {
           area1HorizontalSprinklers, 
           area1VerticalSprinklers,
           width, 
-          perimeterLength
-          // likely needs offset
+          perimeterLength,
+          // offsetX = 0
+          0,
+          // offsetY= internalLength
+          internalLength
           )
-        // Area 1 needs internal length to be added to all points (using js y positive downwards) 
+          appendArray2ElementsIntoArray1(sprinklerPositionArray,area1Points)
+          // sprinklerPositionArray.push(area1Points)
+          maxDistanceArray.push( computeHypotunous(area1VerticalSpacing, area1HorizontalSpacing) )
       }
       // Area 2: perimeterWidth * internalGridLength
-      // Area 2 needs internal width to be added to all points (using js x positive to right) 
+      if (perimeterWidth > 0) {
+        let [
+          area2HorizontalSprinklers, area2VerticalSprinklers, 
+          area2VerticalSpacing, area2HorizontalSpacing
+        ] = computeMaxSprinklerSpacingAndGridInRect(perimeterWidth, internalLength)
 
-    } // else finish
-
-    let [
-      perimeterHorizontalSprinklers, 
-      perimeterVerticalSprinklers, 
-      perimeterVerticalSpacing, 
-      perimeterHorizontalSpacing
-    ] = computeMaxSprinklerSpacingAndGridInRect(perimeterWidth, perimeterLength)
-
-    // below can be once broken out of while loop
-    if (totalSprinklers >= area/25) {
-      // continue
-      // locate evenly
-      // should add points of grid to sprinkler locations
-      // then can be re-used for perimeter logic
-      let newPoints = spreadPointsEvenly(
-        horizontalSprinklers, 
-        verticalSprinklers, 
-        width, length
-        )
-
-      let newSpacing = [verticalSpacing, horizontalSpacing]  
-      appendArray2ElementsIntoArray1(sprinklerPositionArray,newPoints)
-      appendArray2ElementsIntoArray1(sprinklerSpacingArray,newSpacing)
-      let newRadius = computeHypotunous(verticalSpacing, horizontalSpacing) // append to distance array
-      radiusArray.push(newRadius)
-      console.log("less than 25sqm per sprinkler")
-      return [
-        sprinklerPositionArray, 
-          // sprinklers all spaced evenly in config
-          //  therefore should be max sprinkler spacing
-          // if changed to recursion, should be check against max spacing
-          // also location of sprinklers with max spacing
-        Math.max(
-          // verticalSpacing, 
-          // horizontalSpacing
-          ...radiusArray
+        let area2Points = spreadPointsEvenly(
+          area2HorizontalSprinklers, 
+          area2VerticalSprinklers,
+          perimeterWidth, 
+          internalLength,
+          // offsetX = internalWidth
+          internalWidth,
+          // offsetY= 0
+          0
           )
-      ]
-    } else {
-      console.log("further sprinklers needed at perimeter")
-      // add further sprinkler(s)
-      // reduce area until sprinkler >= area /25
-      let internalSprinklers = totalSprinklers;
-      let internalWidth, internalLength = width, length;
-      let reductionInDimension = 0.1
-      // let internalArea = area
-      while (internalSprinklers < ((internalWidth * internalLength)/25)) {
-        
-        if (internalWidth > internalLength) {
-          internalWidth = reduceDistance(internalWidth, reductionInDimension)
-        } else {
-          internalLength = reduceDistance(internalLength, reductionInDimension)
-        }
+          appendArray2ElementsIntoArray1(sprinklerPositionArray, area2Points)
+          // sprinklerPositionArray.push(area2Points)
+          maxDistanceArray.push( computeHypotunous(area2VerticalSpacing, area2HorizontalSpacing) )
+    } 
 
-      }
-
-      // locate evenly inner grid only
-      // use dimensions to get spread even and receive spread; 
-      let innerGridPoints = spreadPointsEvenly(horizontalSprinklers, verticalSprinklers, internalWidth, internalLength)
-      Array.prototype.push.apply(sprinklerPositionArray,innerGridPoints)
-
-      // let totatSprinklerLocations = innerGridPoints; // add perimeter
-      // add sprinklers as needed to perimeter
-      // let internalVerticalSpaing = computeSpacing(internalLength, verticalSprinklers)
-      // should loop through; in
-      let perimeterWidth = width - internalWidth;
-      let perimeterLength = length - internalLength;
-      // find sprinklers to serve perimeter area
-      let [
-        perimeterHorizontalSprinklers, 
-        perimeterVerticalSprinklers, 
-        perimeterVerticalSpacing, 
-        perimeterHorizontalSpacing
-      ] = computeMaxSprinklerSpacingAndGridInRect(perimeterWidth, perimeterLength)
-
-      // check if <25sqm per sprinkler
-      let perimeterArea = perimeterWidth*perimeterLength
-      let totalPerimeterSprinklers = perimeterHorizontalSprinklers*perimeterVerticalSprinklers
-      if (totalPerimeterSprinklers >= perimeterArea/25) {
-        let perimeterSprinklerLocations = spreadPointsEvenly(
-          perimeterHorizontalSprinklers, 
-          perimeterVerticalSprinklers, 
-          perimeterWidth, perimeterLength
-          )
-          appendArray2ElementsIntoArray1(sprinklerPositionArray,perimeterSprinklerLocations)
-      } // else add further points to perimeter
-      else { console.log("futher recursive logic needed")}
-      return [
-        sprinklerPositionArray, 
-        // TODO: should check if any perimeter spacing is larger
-        // could use spacing array Math.max(...spacingArray)
-        computeHypotunous(verticalSpacing, horizontalSpacing)
-        // Math.max(verticalSpacing, horizontalSpacing)
-      ]
-      
     }
+    return [
+      sprinklerPositionArray, 
+      Math.max(
+        ...maxDistanceArray
+        )
+    ]
   }
 
   function appendArray2ElementsIntoArray1(array1, array2) {
-    Array.prototype.push.apply(array1,array2)
+    if (Array.isArray(array2[0])) {
+      Array.prototype.push.apply(array1,array2)
+    } else array1.push(array2)
   }
-
+ 
   function checkSprinklerArea() {
 
   }
@@ -263,7 +223,10 @@ function App() {
     for (let i = 0; i < pointsAcross; i++) {
       for (let j = 0; j < pointsUp; j++) {
         // not sure if y is correct??
-        let current = [horizontalSpacing*(i*2+1)+offsetX, -verticalSpacing*(j*2+1)+offsetY]
+        let current = [
+          horizontalSpacing*(i*2+1)+offsetX, 
+          -verticalSpacing*(j*2+1)-offsetY // later convert
+        ]
         points.push(current)
       }
     }
@@ -374,7 +337,7 @@ function App() {
         <br/>
         { sprinklers && `${sprinklers.length} sprinklers needed`}
         <br/>
-        { sprinklers && sprinklers.map((sprinkler) => `[${sprinkler[0]}, ${-sprinkler[1]}]`)}
+        { sprinklers && sprinklers.map((sprinkler) => `[${parseFloat(sprinkler[0]).toFixed(2)}, ${parseFloat(-sprinkler[1]).toFixed(2)}]`)}
         <br/>
         { maxDistance ? `max distance from fire to sprinkler: ${maxDistance.toFixed(2)}m` : null}
         {/* {u && ` ${u} % of the wall can be unprotected`} */}
