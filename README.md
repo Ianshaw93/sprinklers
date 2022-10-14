@@ -10,7 +10,7 @@ Step 3: Open VS code (or your code editor of choice) & open folder created in pr
 
 Step 4: Open terminal (move cursor to bottom of vs code, click and drag from bottom up)
 
-Step 5: command in terminal: git clone '<paste https link for project>'
+Step 5: command in terminal: git clone then paste https link for project
 
 ![image](https://user-images.githubusercontent.com/76686112/195809234-afe19523-b027-46f8-91b6-825c0037d071.png)
   
