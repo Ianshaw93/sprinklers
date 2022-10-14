@@ -24,6 +24,8 @@ Step 7: command in terminal to install all packages used in project:
   
   npm install
   
+  if step 7 is not working, vs code may need to be restarted following download of node
+  
 Step 8: command in terminal to run project in browser:
   
   npm start
