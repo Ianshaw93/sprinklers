@@ -1,3 +1,35 @@
+# Instructions to Download Project Branch
+
+Step 1: copy https link for project 
+
+![image](https://user-images.githubusercontent.com/76686112/195808114-25cd895b-50d6-4265-9f93-9170f835c1d5.png)
+
+Step 2: create new folder in desktop
+
+Step 3: Open VS code (or your code editor of choice) & open folder created in previous step
+
+Step 4: Open terminal (move cursor to bottom of vs code, click and drag from bottom up)
+
+Step 5: command in terminal: git clone <paste https link for project>
+
+![image](https://user-images.githubusercontent.com/76686112/195809234-afe19523-b027-46f8-91b6-825c0037d071.png)
+  
+  press enter
+  
+Step 6: If not already downloaded, you will need to download node. Click on windows installer in link below.
+  
+https://nodejs.org/en/download/
+
+Step 7: command in terminal to install all packages used in project:
+  
+  npm install
+  
+Step 8: command in terminal to run project in browser:
+  
+  npm start
+  
+The browser should open with the web app running
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
