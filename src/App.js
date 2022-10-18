@@ -3,7 +3,7 @@ import { CSVDownload, CSVLink } from 'react-csv';
 import './App.css';
 import ResponseTime from './components/ResponseTime';
 import {computeActivationTime, computeHeatReleaseRate} from './helpers/responseTimeUtils'
-import {findRandomPointInArea} from './helpers/sprinklerLayoutUtils'
+// import {findRandomPointInArea} from './helpers/sprinklerLayoutUtils'
 
 function App() {
   const [calcData, setCalcData] = useState({
@@ -98,11 +98,11 @@ function App() {
 
   }
   
-  // function findRandomPointInArea(width, length) {
-  //   let x = findRandomPointInDimension(width)
-  //   let y = findRandomPointInDimension(-length)
-  //   return [x, y]
-  // }
+  function findRandomPointInArea(width, length) {
+    let x = findRandomPointInDimension(width)
+    let y = findRandomPointInDimension(-length)
+    return [x, y]
+  }
 
   function findRandomPointInDimension(distance, digits=2) {
     return (Math.random()*distance).toFixed(digits)
