@@ -9,7 +9,7 @@ const ResponseTime = ({maxDistance=3, roomArea=30, roomHeight=3, growthRate= 0.0
     })
 
 
-    let activationTime = computeActivationTime(maxDistance, roomArea, roomHeight, rTI, tActive)
+    let activationTime = computeActivationTime(maxDistance, roomArea, roomHeight, growthRate, rTI, tActive)
     let activationHRR = computeHeatReleaseRate(growthRate, activationTime)
     let hRRMultipliedBySafetyFactor = activationHRR * safetyFactor.multiple 
     let safetyHRRPercentage = (safetyFactor.multiple*100)+safetyFactor.percentage 

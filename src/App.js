@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import './App.css';
 import ResponseTime from './components/ResponseTime';
+import {computeActivationTime, computeHeatReleaseRate} from './helpers/responseTimeUtils'
 
 function App() {
   const [calcData, setCalcData] = useState({
@@ -39,7 +40,7 @@ function App() {
 
   const [sprinklers, maxDistance] = (calcData.width && calcData.length) ? computeSprinklersNeeded(area, calcData.width, calcData.length) : [null, null]
   
-
+  // TODO: separate MC sim page - perhaps component
   // set up montecarlo loop from function
   let monteCarloArea = 45
   let monteCarloWidth = 8
@@ -47,16 +48,27 @@ function App() {
 
   monteCarloLoop()
 
+  function setupCsv() {
+    
+  }
+
   function monteCarloLoop() {
     // data to be sent in:
-    // hrr array
     const growthRateArray = Object.values(growthRateObject)
     const dataLength = growthRateArray.length
     const roomAreaArray = [48, 32, 72, 40]
     const roomWidthArray = [6, 4, 9, 5]
     const roomLengthArray = [8, 8, 8, 8]
     const ceilingHeightArray = [3.5, 4, 5, 4.2, 4.8]
-    let rTI = 285
+    const rTI = 285
+    const tActive = 68
+
+    let safetyFactor = {
+      multiple: 2,
+      percentage: 20,
+  }
+    // TODO: include inputs into csv object/array
+
     // room_area_array, width_array, length_array
     // rti = 285
     // ceilingHeightArray
@@ -66,6 +78,12 @@ function App() {
       let randomMonteCarloPoint = findRandomPointInArea(roomWidthArray[i], roomLengthArray[i])
       let maxDMonteCarlo = computeMaxDistanceFromPoint(roomWidthArray[i], roomLengthArray[i], sprinklersMonteCarlo, randomMonteCarloPoint)
       // calc hrr from maxD and growthRate
+      let activationTime = computeActivationTime(maxDMonteCarlo, roomAreaArray[i], ceilingHeightArray[i], growthRateArray[i], rTI, tActive)
+      let activationHRR = computeHeatReleaseRate(growthRateArray[i], activationTime)
+      let hRRMultipliedBySafetyFactor = activationHRR * safetyFactor.multiple 
+      let safetyHRRPercentage = (safetyFactor.multiple*100)+safetyFactor.percentage 
+      // add outputs to csv
+
     }
 
     // kick to csv

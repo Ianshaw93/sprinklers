@@ -15,12 +15,12 @@ export function computeQC(q) {
 
 export function computeMEntropy(z, g, prevRhoUpper, cP, tAmb, qC) {
     return (
-        E * ((g*(prevRhoUpper**2) / 
+        constants.E * ((g*(prevRhoUpper**2) / 
         (cP*tAmb))**(1/3))*((qC**(1/3))*(z**(5/3))) || 0) 
 }
 
 export function computeRhoUpper(tAmb, tUpper) {
-    return rho * ( tAmb / tUpper )
+    return constants.rho * ( tAmb / tUpper )
 }
 
 export function computeMUpper(mEntropy, prevMUpper) {
@@ -34,11 +34,11 @@ export function computeTUpper(tSmoke, prevTUpper, mEntropy, mUpper
 }
 
 export function computeTSmoke(qC, mEntropy) {
-    let LHS = qC/(mEntropy*cp)
+    let LHS = qC/(mEntropy*constants.cp)
     if (qC == 0) {
         LHS = 0
     }
-    return LHS + tAmb
+    return LHS + constants.tAmb
 }
 
 export function computeZ(prevZ, deltaH) {
@@ -82,7 +82,7 @@ export function checkIfActivated(tDetector, tActive, activated=false) {
     return activated
 }
 
-export function computeActivationTime(maxDistance, roomArea, roomHeight, rTI, tActive) {
+export function computeActivationTime(maxDistance, roomArea, roomHeight, growthRate, rTI, tActive) {
     // Question: should all values be stored, even after activation?
     let activated = false
     let tDetector= constants.tAmb 
