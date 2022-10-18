@@ -39,9 +39,38 @@ function App() {
 
   const [sprinklers, maxDistance] = (calcData.width && calcData.length) ? computeSprinklersNeeded(area, calcData.width, calcData.length) : [null, null]
   
-  // let monteCarloArea = 45
-  // let monteCarloWidth = 8
-  // let monteCarloLength = monteCarloArea / monteCarloWidth
+
+  // set up montecarlo loop from function
+  let monteCarloArea = 45
+  let monteCarloWidth = 8
+  let monteCarloLength = monteCarloArea / monteCarloWidth
+
+  monteCarloLoop()
+
+  function monteCarloLoop() {
+    // data to be sent in:
+    // hrr array
+    const growthRateArray = Object.values(growthRateObject)
+    const dataLength = growthRateArray.length
+    const roomAreaArray = [48, 32, 72, 40]
+    const roomWidthArray = [6, 4, 9, 5]
+    const roomLengthArray = [8, 8, 8, 8]
+    const ceilingHeightArray = [3.5, 4, 5, 4.2, 4.8]
+    let rTI = 285
+    // room_area_array, width_array, length_array
+    // rti = 285
+    // ceilingHeightArray
+    for (let i=0; i<dataLength; i++) {
+      let [sprinklersMonteCarlo] = computeSprinklersNeeded(roomAreaArray[i], roomWidthArray[i], roomLengthArray[i])
+      console.log(sprinklersMonteCarlo)
+      let randomMonteCarloPoint = findRandomPointInArea(roomWidthArray[i], roomLengthArray[i])
+      let maxDMonteCarlo = computeMaxDistanceFromPoint(roomWidthArray[i], roomLengthArray[i], sprinklersMonteCarlo, randomMonteCarloPoint)
+      // calc hrr from maxD and growthRate
+    }
+
+    // kick to csv
+
+  }
   // const [sprinklersMonteCarlo] = computeSprinklersNeeded(monteCarloArea, monteCarloWidth, monteCarloLength)
   // console.log(sprinklersMonteCarlo)
   // const randomMonteCarloPoint = findRandomPointInArea(monteCarloWidth, monteCarloLength)
@@ -57,7 +86,7 @@ function App() {
     return (Math.random()*distance).toFixed(digits)
   }
 
-  function computeMaxDistanceFromPoint(width=monteCarloWidth, length=monteCarloLength, sprinklerLocationArray=sprinklersMonteCarlo, point=randomMonteCarloPoint) {
+  function computeMaxDistanceFromPoint(width, length, sprinklerLocationArray, point) {
     let maxDistanceToPoint = null
     let [pointX, pointY] = point 
     // loop through sprinkler locations
