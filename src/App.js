@@ -57,7 +57,7 @@ function App() {
     return (Math.random()*distance).toFixed(digits)
   }
 
-  function computeMaxDistanceFromPoint(width=monteCarloWidth, length=monteCarloLength, sprinklerLocationArray=sprinklersMonteCarlo, point=randomMonteCarloPoint) {
+  function computeMaxDistanceFromPoint(width, length, sprinklerLocationArray, point) {
     let maxDistanceToPoint = null
     let [pointX, pointY] = point 
     // loop through sprinkler locations
