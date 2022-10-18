@@ -37,15 +37,15 @@ function App() {
 
   const area = computeRectArea(calcData.width, calcData.length)
 
-  const [sprinklers, maxDistance] = (area) ? computeSprinklersNeeded(area, calcData.width, calcData.length) : [null, null]
+  const [sprinklers, maxDistance] = (calcData.width && calcData.length) ? computeSprinklersNeeded(area, calcData.width, calcData.length) : [null, null]
   
-  let monteCarloArea = 45
-  let monteCarloWidth = 8
-  let monteCarloLength = monteCarloArea / monteCarloWidth
-  const [sprinklersMonteCarlo] = computeSprinklersNeeded(monteCarloArea, monteCarloWidth, monteCarloLength)
-  console.log(sprinklersMonteCarlo)
-  const randomMonteCarloPoint = findRandomPointInArea(monteCarloWidth, monteCarloLength)
-  const maxDMonteCarlo = computeMaxDistanceFromPoint()
+  // let monteCarloArea = 45
+  // let monteCarloWidth = 8
+  // let monteCarloLength = monteCarloArea / monteCarloWidth
+  // const [sprinklersMonteCarlo] = computeSprinklersNeeded(monteCarloArea, monteCarloWidth, monteCarloLength)
+  // console.log(sprinklersMonteCarlo)
+  // const randomMonteCarloPoint = findRandomPointInArea(monteCarloWidth, monteCarloLength)
+  // const maxDMonteCarlo = computeMaxDistanceFromPoint()
   
   function findRandomPointInArea(width, length) {
     let x = findRandomPointInDimension(width)
@@ -154,8 +154,9 @@ function App() {
           // offsetY= internalLength
           internalLength
           )
+          // TODO: check if sprinkler locations >= 1.4m away from central grid sprinkler locations
+          // if not move sprinkler closer to wall, but must be >=100mm away from wall
           appendArray2ElementsIntoArray1(sprinklerPositionArray,area1Points)
-          // sprinklerPositionArray.push(area1Points)
           maxDistanceArray.push( computeHypotunous(area1VerticalSpacing, area1HorizontalSpacing) )
       }
       // Area 2: perimeterWidth * internalGridLength
@@ -175,8 +176,9 @@ function App() {
           // offsetY= 0
           0
           )
+          // TODO: check if sprinkler locations >= 1.4m away from central grid sprinkler locations
+          // if not move sprinkler closer to wall, but must be >=100mm away from wall
           appendArray2ElementsIntoArray1(sprinklerPositionArray, area2Points)
-          // sprinklerPositionArray.push(area2Points)
           maxDistanceArray.push( computeHypotunous(area2VerticalSpacing, area2HorizontalSpacing) )
     } 
 
