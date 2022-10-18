@@ -44,11 +44,20 @@ function App() {
   let monteCarloLength = monteCarloArea / monteCarloWidth
   const [sprinklersMonteCarlo] = computeSprinklersNeeded(monteCarloArea, monteCarloWidth, monteCarloLength)
   console.log(sprinklersMonteCarlo)
-
+  const randomMonteCarloPoint = findRandomPointInArea(monteCarloWidth, monteCarloLength)
   const maxDMonteCarlo = computeMaxDistanceFromPoint()
   
+  function findRandomPointInArea(width, length) {
+    let x = findRandomPointInDimension(width)
+    let y = findRandomPointInDimension(-length)
+    return [x, y]
+  }
 
-  function computeMaxDistanceFromPoint(width=monteCarloWidth, length=monteCarloLength, sprinklerLocationArray=sprinklersMonteCarlo, point=[0,0]) {
+  function findRandomPointInDimension(distance, digits=2) {
+    return (Math.random()*distance).toFixed(digits)
+  }
+
+  function computeMaxDistanceFromPoint(width=monteCarloWidth, length=monteCarloLength, sprinklerLocationArray=sprinklersMonteCarlo, point=randomMonteCarloPoint) {
     let maxDistanceToPoint = null
     let [pointX, pointY] = point 
     // loop through sprinkler locations
@@ -61,7 +70,7 @@ function App() {
       // difference
       let distance = computeHypotunous(diffX, diffY)
 
-      if (maxDistanceToPoint == null || maxDistanceToPoint < distance) {
+      if (maxDistanceToPoint == null || maxDistanceToPoint > distance) {
         maxDistanceToPoint = distance
       }
     }
@@ -185,10 +194,7 @@ function App() {
       Array.prototype.push.apply(array1,array2)
     } else array1.push(array2)
   }
- 
-  function checkSprinklerArea() {
 
-  }
 
   function computeMaxSprinklersInRect(width, length, radius=5.5) {
     let horizontalSprinklers = Math.ceil(width / radius)
