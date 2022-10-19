@@ -1,6 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { CSVDownload, CSVLink } from 'react-csv';
 import './App.css';
 import ResponseTime from './components/ResponseTime';
+import {computeActivationTime, computeHeatReleaseRate} from './helpers/responseTimeUtils'
+// import {findRandomPointInArea} from './helpers/sprinklerLayoutUtils'
 
 function App() {
   const [calcData, setCalcData] = useState({
@@ -39,13 +42,61 @@ function App() {
 
   const [sprinklers, maxDistance] = (calcData.width && calcData.length) ? computeSprinklersNeeded(area, calcData.width, calcData.length) : [null, null]
   
-  // let monteCarloArea = 45
-  // let monteCarloWidth = 8
-  // let monteCarloLength = monteCarloArea / monteCarloWidth
-  // const [sprinklersMonteCarlo] = computeSprinklersNeeded(monteCarloArea, monteCarloWidth, monteCarloLength)
-  // console.log(sprinklersMonteCarlo)
-  // const randomMonteCarloPoint = findRandomPointInArea(monteCarloWidth, monteCarloLength)
-  // const maxDMonteCarlo = computeMaxDistanceFromPoint()
+  // TODO: separate MC sim page - perhaps component
+  // set up montecarlo loop from function
+  let monteCarloArea = 45
+  let monteCarloWidth = 8
+  let monteCarloLength = monteCarloArea / monteCarloWidth
+
+  let csvData = monteCarloLoop()
+
+  // function setupCsv(headers, data) {
+    
+  // }
+
+  function monteCarloLoop() {
+    // data to be sent in:
+    const growthRateArray = Object.values(growthRateObject)
+    const dataLength = growthRateArray.length
+    const roomAreaArray = [48, 32, 72, 40]
+    const roomWidthArray = [6, 4, 9, 5]
+    const roomLengthArray = [8, 8, 8, 8]
+    const ceilingHeightArray = [3.5, 4, 5, 4.2, 4.8]
+    const rTI = 285
+    const tActive = 68
+
+    let safetyFactor = {
+      multiple: 2,
+      percentage: 20,
+  }
+    // TODO: change name of outputed file
+    // note no randomPoint, or sprinkler co-ordinates in csv
+    const headers = ["roomArea", "roomWidth", "roomLength", "roomCeilingHeight", "growthRate", "rti", "tActive", "activationTime", "activationHRR", "doubleActivationHRR"]
+    let csvData = []
+    csvData.push(headers)
+    // room_area_array, width_array, length_array
+    // rti = 285
+    // ceilingHeightArray
+    for (let i=0; i<dataLength; i++) {
+      
+      let [sprinklersMonteCarlo] = computeSprinklersNeeded(roomAreaArray[i], roomWidthArray[i], roomLengthArray[i])
+      console.log(sprinklersMonteCarlo)
+      let randomMonteCarloPoint = findRandomPointInArea(roomWidthArray[i], roomLengthArray[i])
+      let maxDMonteCarlo = computeMaxDistanceFromPoint(roomWidthArray[i], roomLengthArray[i], sprinklersMonteCarlo, randomMonteCarloPoint)
+      // calc hrr from maxD and growthRate
+      let activationTime = computeActivationTime(maxDMonteCarlo, roomAreaArray[i], ceilingHeightArray[i], growthRateArray[i], rTI, tActive)
+      let activationHRR = computeHeatReleaseRate(growthRateArray[i], activationTime)
+      let hRRMultipliedBySafetyFactor = activationHRR * safetyFactor.multiple 
+      let safetyHRRPercentage = (safetyFactor.multiple*100)+safetyFactor.percentage
+      let rowData = [roomAreaArray[i], roomWidthArray[i], roomLengthArray[i], ceilingHeightArray[i], growthRateArray[i], rTI, tActive, activationTime, activationHRR, hRRMultipliedBySafetyFactor]
+      csvData.push(rowData) 
+      // add outputs to csv
+      console.log(csvData)
+    }
+    return csvData
+    // kick to csv
+
+  }
   
   function findRandomPointInArea(width, length) {
     let x = findRandomPointInDimension(width)
@@ -361,7 +412,7 @@ function App() {
          /> 
          : null
          }
-
+      {(csvData) ? <CSVLink data={csvData} filename={"mcSimReport"} target={"_blank"} >Export to Csv</CSVLink>  : null}
       </div>
     </>
 
