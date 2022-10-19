@@ -71,7 +71,7 @@ function App() {
   }
     // TODO: change name of outputed file
     // note no randomPoint, or sprinkler co-ordinates in csv
-    const headers = ["roomArea", "roomWidth", "roomLength", "roomCeilingHeight", "growthRate", "rti", "tActive", "activationTime", "activationHRR", "doubleActivationHRR"]
+    const headers = ["roomArea", "roomWidth", "roomLength", "roomCeilingHeight", "growthRate", "rti", "tActive", "sprinklerLocations", "randomPoint", "activationTime", "activationHRR", "doubleActivationHRR"]
     let csvData = []
     csvData.push(headers)
     // room_area_array, width_array, length_array
@@ -88,7 +88,7 @@ function App() {
       let activationHRR = computeHeatReleaseRate(growthRateArray[i], activationTime)
       let hRRMultipliedBySafetyFactor = activationHRR * safetyFactor.multiple 
       let safetyHRRPercentage = (safetyFactor.multiple*100)+safetyFactor.percentage
-      let rowData = [roomAreaArray[i], roomWidthArray[i], roomLengthArray[i], ceilingHeightArray[i], growthRateArray[i], rTI, tActive, activationTime, activationHRR, hRRMultipliedBySafetyFactor]
+      let rowData = [roomAreaArray[i], roomWidthArray[i], roomLengthArray[i], ceilingHeightArray[i], growthRateArray[i], rTI, tActive, sprinklersMonteCarlo, randomMonteCarloPoint, activationTime, activationHRR, hRRMultipliedBySafetyFactor]
       csvData.push(rowData) 
       // add outputs to csv
       console.log(csvData)
@@ -412,7 +412,7 @@ function App() {
          /> 
          : null
          }
-      {(csvData) ? <CSVLink data={csvData} filename={"mcSimReport"} target={"_blank"} >Export to Csv</CSVLink>  : null}
+      {(csvData) ? <CSVLink data={csvData} filename={"mcSimReport"} target={"_blank"} >Export MonteCarlo Sim to Csv</CSVLink>  : null}
       </div>
     </>
 
