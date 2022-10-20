@@ -157,8 +157,7 @@ function App() {
          /> 
          : null
          }
-         <MonteCarloSim />
-      {/* {(csvData) ? <CSVLink data={csvData} filename={"mcSimReport"} target={"_blank"} >Export MonteCarlo Sim to Csv</CSVLink>  : null} */}
+         {/* <MonteCarloSim /> */}
       </div>
     </>
 
