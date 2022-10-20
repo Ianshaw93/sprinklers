@@ -4,6 +4,14 @@ import {computeActivationTime, computeHeatReleaseRate} from '../helpers/response
 
 const MonteCarloSim = () => {
    
+    const growthRateObject = {
+        slow: 0.0029,
+        medium: 0.0117,
+        fast: 0.047,
+        ultraFast: 0.188 
+      }
+    
+    
 
   return (
     <>
